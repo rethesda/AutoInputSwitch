@@ -47,19 +47,11 @@ auto InputEventHandler::ProcessEvent(
 
 static bool IsRunningOnSteamDeck()
 {
-	static bool hasSteamDeckSupport = []()
-	{
-		// class size increased from 0x180 to 0x210
-		const auto vtbl = REL::Relocation<std::uintptr_t*>(Offset::BSWin32SystemUtility::Vtbl);
-		const auto dtor = vtbl.get()[0];
-		return REL::make_pattern<"BA 10 02 00 00">().match(dtor + 0xA4);
-	}();
+	const static auto systemUtility = (REL::Module::get().vendor() == REL::Vendor::Steam &&
+									   REL::Module::get().version() >= SKSE::RUNTIME_1_6_1130)
+		? static_cast<RE::BSWin32SystemUtility_Steam*>(RE::BSSystemUtility::GetSingleton())
+		: nullptr;
 
-	if (!hasSteamDeckSupport) {
-		return false;
-	}
-
-	const auto systemUtility = RE::BSWin32SystemUtility::GetSingleton();
 	return systemUtility && systemUtility->isRunningOnSteamDeck;
 }
 
@@ -122,9 +114,8 @@ void InputEventHandler::ProcessInput(const RE::InputEvent& a_event)
 			if (_preferredPlatform != Platform::PC) {
 				_usingGamepad = true;
 
-				static REL::Relocation<RE::Setting*> gamepadRumble{
-					Offset::INIPrefSetting::Controls::bGamepadRumble
-				};
+				static REL::Relocation<RE::Setting*> gamepadRumble{ STATIC_OFFSET(
+					INIPrefSetting::Controls::bGamepadRumble) };
 				SetGamepadRumbleEnabled(gamepadRumble->GetBool());
 
 				RefreshMenus();
@@ -163,18 +154,14 @@ void InputEventHandler::ComputeMouseLookVector(
 
 	RE::NiPoint2& lookVec = playerControls->data.lookInputVec;
 
-	static REL::Relocation<RE::Setting*> fMouseHeadingSensitivity{
-		Offset::INIPrefSetting::Controls::fMouseHeadingSensitivity
-	};
-	static REL::Relocation<RE::Setting*> fMouseHeadingXScale{
-		Offset::INISetting::Controls::fMouseHeadingXScale
-	};
-	static REL::Relocation<RE::Setting*> fMouseHeadingYScale{
-		Offset::INISetting::Controls::fMouseHeadingYScale
-	};
-	static REL::Relocation<float*> secondsSinceLastFrameRealTime{
-		Offset::SecondsSinceLastFrameRealTime
-	};
+	static REL::Relocation<RE::Setting*> fMouseHeadingSensitivity{ STATIC_OFFSET(
+		INIPrefSetting::Controls::fMouseHeadingSensitivity) };
+	static REL::Relocation<RE::Setting*> fMouseHeadingXScale{ STATIC_OFFSET(
+		INISetting::Controls::fMouseHeadingXScale) };
+	static REL::Relocation<RE::Setting*> fMouseHeadingYScale{ STATIC_OFFSET(
+		INISetting::Controls::fMouseHeadingYScale) };
+	static REL::Relocation<float*> secondsSinceLastFrameRealTime{ STATIC_OFFSET(
+		SecondsSinceLastFrameRealTime) };
 
 	float userSensitivity = fMouseHeadingSensitivity->GetFloat();
 	float xScale = fMouseHeadingXScale->GetFloat();

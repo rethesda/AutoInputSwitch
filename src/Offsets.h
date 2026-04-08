@@ -1,15 +1,31 @@
 #pragma once
 
-namespace Offset
+namespace RE::Offset
 {
 	namespace BSInputDeviceManager
 	{
 		// SkyrimSE 1.6.318.0: 0xC3AF10
 		inline constexpr REL::ID Ctor(68615);
-		// SkyrimSE 1.6.1130.0: 0xCD48C0
-		inline constexpr REL::ID QUsingGamepad(443396);
-		// SkyrimSE 1.6.318.0: 0xC3B4F0
-		inline constexpr REL::ID QUsingGamepad_OLD(68622);
+
+		[[nodiscard]] inline std::uint64_t QUsingGamepad()
+		{
+			switch (REL::Module::get().vendor()) {
+			case REL::Vendor::Steam:
+				if (REL::Module::get().version() >= SKSE::RUNTIME_1_6_1130) {
+					// SkyrimSE 1.6.1130.0: 0xCD48C0
+					return 443396;
+				}
+				else {
+					// SkyrimSE 1.6.318.0: 0xC3B4F0
+					return 68622;
+				}
+			case REL::Vendor::GOG:
+				// SkyrimSE GOG 1.6.1179.0: 0xC3C350
+				return 510926;
+			}
+			return 0;
+		}
+
 		// SkyrimSE 1.6.318.0: 0xC3B530
 		inline constexpr REL::ID IsGamepadConnected(68624);
 	}
