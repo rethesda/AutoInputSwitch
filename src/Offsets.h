@@ -4,8 +4,17 @@ namespace RE::Offset
 {
 	namespace BSInputDeviceManager
 	{
-		// SkyrimSE 1.6.318.0: 0xC3AF10
-		inline constexpr REL::ID Ctor(68615);
+		[[nodiscard]] inline std::uint64_t Ctor()
+		{
+			if (REL::Module::get().version() >= SKSE::RUNTIME_1_7_99) {
+				// SkyrimSE 1.7.99.0: 0xCF8E60
+				return 524129;
+			}
+			else {
+				// SkyrimSE 1.6.318.0: 0xC3AF10
+				return 68615;
+			}
+		}
 
 		[[nodiscard]] inline std::uint64_t QUsingGamepad()
 		{
@@ -26,8 +35,17 @@ namespace RE::Offset
 			return 0;
 		}
 
-		// SkyrimSE 1.6.318.0: 0xC3B530
-		inline constexpr REL::ID IsGamepadConnected(68624);
+		[[nodiscard]] inline std::uint64_t IsGamepadConnected()
+		{
+			if (REL::Module::get().version() >= SKSE::RUNTIME_1_7_99) {
+				// SkyrimSE 1.7.99.0: 0xCF9550
+				return 443396;
+			}
+			else {
+				// SkyrimSE 1.6.318.0: 0xC3B530
+				return 68624;
+			}
+		}
 	}
 
 	namespace BSPCGamepadDeviceHandler

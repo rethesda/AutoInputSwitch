@@ -30,18 +30,18 @@ void Hooks::InstallDeviceConnectHook()
 void Hooks::InstallInputManagerHook()
 {
 	static constinit auto pattern = REL::make_pattern<"B1 01 EB 02">();
-	auto hook = REL::Relocation<std::uintptr_t>(STATIC_OFFSET(BSInputDeviceManager::Ctor) + 0x2A9);
+	auto hook = REL::Relocation<std::uintptr_t>(STATIC_OFFSET(BSInputDeviceManager::Ctor) + 0x345);
 
-	if (!pattern.match(hook.address())) {
-		hook = REL::Relocation<std::uintptr_t>(STATIC_OFFSET(BSInputDeviceManager::Ctor) + 0x2B7);
-
-		if (!pattern.match(hook.address())) {
-			logger::critical("Failed to install BSInputDeviceManager hook"sv);
+	auto offsets = { 0x345, 0x2A9, 0x2B7 };
+	for (auto offset : offsets) {
+		hook = REL::Relocation<std::uintptr_t>(STATIC_OFFSET(BSInputDeviceManager::Ctor) + offset);
+		if (pattern.match(hook.address())) {
+			REL::safe_fill(hook.address(), REL::NOP, 0x4);
 			return;
 		}
 	}
 
-	REL::safe_fill(hook.address(), REL::NOP, 0x4);
+	logger::critical("Failed to install BSInputDeviceManager hook"sv);
 }
 
 void Hooks::InstallUsingGamepadHook()
